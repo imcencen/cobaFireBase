@@ -49,7 +49,9 @@ class MainActivity : AppCompatActivity() {
         fun TambahData(db: FirebaseFirestore, Provinsi: String, Ibukota : String) {
             val dataBaru = daftarProvinsi(Provinsi, Ibukota)
             db.collection("tbProvinsi")
-                .add(dataBaru)
+                .document(dataBaru.provinsi)
+                .set(dataBaru)
+//                .add(dataBaru)
                 .addOnSuccessListener {
                     _etProvinsi.setText("")
                     _etIbukota.setText("")
@@ -67,6 +69,7 @@ class MainActivity : AppCompatActivity() {
                 .addOnSuccessListener {
                     result ->
                     dataProvinsi.clear()
+                    data.clear()
                     for (document in result) {
                         val readData = daftarProvinsi(
                             document.data.get("provinsi").toString(),
@@ -92,6 +95,23 @@ class MainActivity : AppCompatActivity() {
             readData(db)
         }
         readData(db)
+
+        _lvData.setOnItemLongClickListener { parent, view, position, id ->
+            val namaPro = data[position].get("Pro")
+            if (namaPro != null) {
+                db.collection("tbProvinsi")
+                    .document(namaPro)
+                    .delete()
+                    .addOnSuccessListener {
+                        Log.d("Firebasee", "Berhasil dihapus")
+                        readData(db)
+                    }
+                    .addOnFailureListener { e ->
+                        Log.w("Firebasee", e.message.toString())
+                    }
+            }
+            true
+        }
 
     }
 
